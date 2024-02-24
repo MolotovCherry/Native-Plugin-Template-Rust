@@ -31,7 +31,11 @@ declare_plugin! {
 
 // Dll entry point
 #[no_mangle]
-extern "C-unwind" fn DllMain(module: HINSTANCE, fdw_reason: u32, _lpv_reserved: *const c_void) {
+extern "C-unwind" fn DllMain(
+    module: HINSTANCE,
+    fdw_reason: u32,
+    _lpv_reserved: *const c_void,
+) -> bool {
     #[allow(clippy::single_match)]
     match fdw_reason {
         DLL_PROCESS_ATTACH => {
@@ -76,6 +80,8 @@ extern "C-unwind" fn DllMain(module: HINSTANCE, fdw_reason: u32, _lpv_reserved: 
 
         _ => (),
     }
+
+    true
 }
 
 // All of our main plugin code goes here!
