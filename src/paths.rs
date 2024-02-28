@@ -70,7 +70,7 @@ pub fn get_dll_path(module: HINSTANCE) -> Result<PathBuf> {
 
     // bubble up error if there was any, for example, ERROR_INSUFFICIENT_BUFFER
     unsafe {
-        GetLastError()?;
+        return Err(eyre!("WIN32_ERROR({})", GetLastError().0));
     }
 
     let path = OsString::from_wide(&path[..written_len]);
