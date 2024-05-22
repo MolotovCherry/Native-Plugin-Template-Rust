@@ -7,11 +7,11 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-log = "0.4.20"
-simplelog = "0.12.1"
+log = "0.4.21"
+simplelog = "0.12.2"
 eyre = "0.6.12"
 directories = "5.0.1"
-backtrace = "0.3.69"
+backtrace = "0.3.71"
 # to update this, you need to update the static lib in the lib folder
 # go to the release page to download the compiled static lib
 # https://github.com/rdbo/libmem/releases
@@ -23,14 +23,14 @@ backtrace = "0.3.69"
 # see README in lib folder
 libmem = { version = "4.4.0", features = ["static"] }
 
-serde = { version = "1.0.197", features = ["derive"] }
-toml = "0.8.10"
+serde = { version = "1.0.202", features = ["derive"] }
+toml = "0.8.13"
 native-plugin-lib = { git = "https://github.com/MolotovCherry/Native-Plugin-Lib" }
 
 # docs can be found here. different api functions require adding the relevant features
 # https://microsoft.github.io/windows-docs-rs/doc/windows/index.html
 [dependencies.windows]
-version = "0.54.0"
+version = "0.56.0"
 features = [
     "Win32_Foundation",
     "Win32_System_SystemServices",
