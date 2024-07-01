@@ -26,16 +26,6 @@ jobs:
         with:
           key: ${{ github.event_name == 'release' && 'prod' || 'dev' }}
 
-      - name: Setup libmem
-        env:
-            GH_TOKEN: ${{ github.token }}
-        run: |
-            gh release download -R rdbo/libmem --pattern "libmem-*-x86_64-windows-msvc-static-mt.tar.gz" -O libmem.tar.gz
-            tar -xvzf libmem.tar.gz
-            cd "libmem*/lib/release"
-            New-Item -ItemType Directory -Force -Path "$env:ProgramFiles\libmem\lib"
-            Copy-Item "libmem.lib" -Destination "$env:ProgramFiles\libmem\lib"
-
       - name: Build Release
         if: github.event_name == 'release'
         run: cargo build --release
