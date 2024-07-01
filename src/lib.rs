@@ -9,10 +9,9 @@ mod popup;
 use std::ffi::c_void;
 
 use eyre::{Context, Error};
-use native_plugin_lib::declare_plugin;
-// For installation steps see README in lib folder
 use libmem::*;
 use log::{error, LevelFilter};
+use native_plugin_lib::declare_plugin;
 use windows::Win32::System::SystemServices::DLL_PROCESS_ATTACH;
 use windows::Win32::{Foundation::HINSTANCE, System::Diagnostics::Debug::IsDebuggerPresent};
 

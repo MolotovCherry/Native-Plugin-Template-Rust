@@ -12,15 +12,6 @@ simplelog = "0.12.2"
 eyre = "0.6.12"
 directories = "5.0.1"
 backtrace = "0.3.73"
-# to update this, you need to update the static lib in the lib folder
-# go to the release page to download the compiled static lib
-# https://github.com/rdbo/libmem/releases
-#
-# Look for the *-x86_64-windows-msvc-static-mt version
-# open the archive, and in the lib folder, use the release libmem.lib
-#
-# For more info on which version to use, how to install, etc,
-# see README in lib folder
 libmem = { version = "5.0.0", features = ["static"] }
 
 serde = { version = "1.0.203", features = ["derive"] }
