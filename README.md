@@ -3,12 +3,14 @@
 [![Build](https://github.com/MolotovCherry/Native-Plugin-Template-Rust/actions/workflows/build.yml/badge.svg?event=push)](https://github.com/MolotovCherry/Native-Plugin-Template-Rust/actions/workflows/build.yml)
 
 1. [Create a new plugin project from this template](https://github.com/new?template_name=Native-Plugin-Template-Rust&template_owner=MolotovCherry)
-2. Follow instructions in `lib` folder and read the README there to finish setting up `libmem`
+2. Clone repo, do your coding, and build it.
 
 To build:
 - [Install Rust](https://rustup.rs/)
 - Install [Visual Studio](https://visualstudio.microsoft.com/downloads/) + Build tools + Desktop development in C++ + Windows SDK
 - Build with `cargo build` or `cargo build --release`
+
+Documentation for [libmem](https://github.com/rdbo/libmem) can be found in the Rust doc comments.
 
 Any build dll is compatible with the original [native mod loader](https://www.nexusmods.com/baldursgate3/mods/944) as well. Paths for config and logs are based off the dll's location to make it portable for users, regardless of loader used
 
