@@ -5,59 +5,11 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use directories::BaseDirs;
-use eyre::{eyre, Result};
+use eyre::{bail, eyre, Result};
 use windows::Win32::{
     Foundation::{GetLastError, HINSTANCE, MAX_PATH},
     System::LibraryLoader::GetModuleFileNameW,
 };
-
-/// Get the larian local directory
-/// `C:\Users\<user>\AppData\Local\Larian Studios`
-pub fn get_larian_local_dir() -> Result<PathBuf> {
-    let local = BaseDirs::new().ok_or(eyre!("Failed to instantiate BaseDirs"))?;
-
-    let mut local = local.data_local_dir().to_owned();
-
-    local.push("Larian Studios");
-    if local.exists() {
-        Ok(local)
-    } else {
-        Err(eyre!("Larian local appdata directory does not exist"))
-    }
-}
-
-/// Get the BG3 local directory
-/// `C:\Users\<user>\AppData\Local\Larian Studios\Baldur's Gate 3`
-pub fn get_bg3_local_dir() -> Result<PathBuf> {
-    let mut local = get_larian_local_dir()?;
-
-    local.push("Baldur's Gate 3");
-
-    if local.exists() {
-        Ok(local)
-    } else {
-        Err(eyre!("Bg3 local appdata directory does not exist"))
-    }
-}
-
-/// Get the bg3 plugins directory
-/// `C:\Users\<user>\AppData\Local\Larian Studios\Baldur's Gate 3\Plugins`
-pub fn get_bg3_plugins_dir() -> Result<PathBuf> {
-    let mut plugins_dir = get_bg3_local_dir()?;
-    plugins_dir.push("Plugins");
-
-    if plugins_dir.exists() {
-        Ok(plugins_dir)
-    } else {
-        Err(eyre!("BG3 Plugins dir not found"))
-    }
-}
-
-/// Create a path to `C:\Users\<user>\AppData\Local\Larian Studios\Baldur's Gate 3\Plugins\<filename>`
-pub fn get_plugins_filepath<P: AsRef<Path>>(path: P) -> Result<PathBuf> {
-    Ok(get_bg3_plugins_dir()?.join(path))
-}
 
 /// Get path to dll `<dll_dir>\myplugin.dll`
 pub fn get_dll_path(module: HINSTANCE) -> Result<PathBuf> {
@@ -69,8 +21,10 @@ pub fn get_dll_path(module: HINSTANCE) -> Result<PathBuf> {
     let written_len = unsafe { GetModuleFileNameW(module, &mut path) as usize };
 
     // bubble up error if there was any, for example, ERROR_INSUFFICIENT_BUFFER
-    unsafe {
-        return Err(eyre!("WIN32_ERROR({})", GetLastError().0));
+    let err = unsafe { GetLastError() };
+    let err = err.to_hresult();
+    if err.is_err() {
+        bail!("{err}");
     }
 
     let path = OsString::from_wide(&path[..written_len]);

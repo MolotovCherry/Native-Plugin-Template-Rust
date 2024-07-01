@@ -1,5 +1,5 @@
+use std::fs;
 use std::path::Path;
-use std::{fs, path::PathBuf};
 
 use eyre::Result;
 use serde::{Deserialize, Serialize};
@@ -8,11 +8,6 @@ use serde::{Deserialize, Serialize};
 /// quicktype.io can help you by converting json to Rust
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Config {
-    // This is not part of the config, but rather used for
-    // at runtime to remember where to save to
-    #[serde(skip)]
-    path: PathBuf,
-
     pub opt1: bool,
     pub opt2: String,
     // etc
@@ -28,28 +23,16 @@ impl Config {
         // if path doesn't exist, create default config,
         // save it, and return it
         if !path.exists() {
-            let config = Self {
-                path: path.to_owned(),
-                ..Default::default()
-            };
+            let config = Self::default();
 
-            config.save()?;
+            let serialized = toml::to_string_pretty(&config)?;
+            fs::write(path, serialized)?;
             return Ok(config);
         }
 
         let data = fs::read_to_string(path)?;
-        let mut config = toml::from_str::<Self>(&data)?;
-
-        // set the plugin config path
-        config.path = path.to_owned();
+        let config = toml::from_str::<Self>(&data)?;
 
         Ok(config)
-    }
-
-    pub fn save(&self) -> Result<()> {
-        let serialized = toml::to_string_pretty(self)?;
-        fs::write(&self.path, serialized)?;
-
-        Ok(())
     }
 }

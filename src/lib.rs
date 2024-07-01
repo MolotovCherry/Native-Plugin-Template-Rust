@@ -103,8 +103,5 @@ fn entry(module: HINSTANCE) {
         get_dll_dir_filepath(module, "my-config.toml").expect("Failed to find config path");
     let config = Config::load(config_path).expect("Failed to load config");
 
-    // save config
-    config.save().expect("Failed to save config");
-
     todo!("Implement hooking logic");
 }
