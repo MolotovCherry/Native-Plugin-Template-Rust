@@ -29,6 +29,10 @@ declare_plugin! {
     "My Plugin Description"
 }
 
+struct SendHandle(HINSTANCE);
+unsafe impl Send for SendHandle {}
+unsafe impl Sync for SendHandle {}
+
 // Dll entry point
 #[no_mangle]
 extern "C-unwind" fn DllMain(
@@ -36,6 +40,8 @@ extern "C-unwind" fn DllMain(
     fdw_reason: u32,
     _lpv_reserved: *const c_void,
 ) -> bool {
+    let handle = SendHandle(module);
+
     #[allow(clippy::single_match)]
     match fdw_reason {
         DLL_PROCESS_ATTACH => {
@@ -43,6 +49,8 @@ extern "C-unwind" fn DllMain(
             // the best thing would be if the loader does a callback on an exported Init fn, but unfortunately
             // many loads don't do this.
             thread::spawn(move || {
+                let handle = handle;
+
                 // Wait for debugger if in debug mode
                 if cfg!(debug_assertions) {
                     let is_debugger_present = || unsafe { IsDebuggerPresent().as_bool() };
@@ -68,10 +76,10 @@ extern "C-unwind" fn DllMain(
                     if cfg!(debug_assertions) {
                         debug_console(LevelFilter::Trace, "Native Plugin Template Debug Console")?;
                     } else {
-                        setup_logging(module).context("Failed to setup logging")?;
+                        setup_logging(handle.0).context("Failed to setup logging")?;
                     }
 
-                    entry(module);
+                    entry(handle.0);
 
                     Ok::<_, Error>(())
                 });
