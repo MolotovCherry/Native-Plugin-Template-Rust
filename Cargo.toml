@@ -12,10 +12,10 @@ simplelog = "0.12.2"
 eyre = "0.6.12"
 directories = "5.0.1"
 backtrace = "0.3.73"
-libmem = { version = "5.0.0", features = ["static"] }
+libmem = { version = "5.0.1", features = ["static"] }
 
-serde = { version = "1.0.203", features = ["derive"] }
-toml = "0.8.14"
+serde = { version = "1.0.209", features = ["derive"] }
+toml = "0.8.19"
 native-plugin-lib = { git = "https://github.com/MolotovCherry/Native-Plugin-Lib" }
 
 # docs can be found here. different api functions require adding the relevant features
