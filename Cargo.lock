@@ -661,7 +661,7 @@ dependencies = [
 [[package]]
 name = "native-plugin-lib"
 version = "0.1.0"
-source = "git+https://github.com/MolotovCherry/Native-Plugin-Lib#ae392b3fb8eec021ec3cb7bf16eb96084d87c595"
+source = "git+https://github.com/MolotovCherry/Native-Plugin-Lib#b425a3ba7046df85ffbe472e57dee2ce868c6a64"
 dependencies = [
  "abi_stable",
  "konst",
