@@ -14,7 +14,7 @@ directories = "5.0.1"
 backtrace = "0.3.73"
 libmem = { version = "5.0.1", features = ["static"] }
 
-serde = { version = "1.0.209", features = ["derive"] }
+serde = { version = "1.0.210", features = ["derive"] }
 toml = "0.8.19"
 native-plugin-lib = { git = "https://github.com/MolotovCherry/Native-Plugin-Lib" }
 
