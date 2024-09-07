@@ -134,9 +134,9 @@ checksum = "8318a53db07bb3f8dca91a600466bdb3f2eaadeedfdbcf02e1accbad9271ba50"
 
 [[package]]
 name = "cc"
-version = "1.1.16"
+version = "1.1.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e9d013ecb737093c0e86b151a7b837993cf9ec6c502946cfb44bedc392421e0b"
+checksum = "a93fe60e2fc87b6ba2c117f67ae14f66e3fc7d6a1e612a25adb238cc980eadb3"
 dependencies = [
  "shlex",
 ]
@@ -661,7 +661,7 @@ dependencies = [
 [[package]]
 name = "native-plugin-lib"
 version = "0.1.0"
-source = "git+https://github.com/MolotovCherry/Native-Plugin-Lib#b425a3ba7046df85ffbe472e57dee2ce868c6a64"
+source = "git+https://github.com/MolotovCherry/Native-Plugin-Lib#7b4fb6530aed4b9272e1e13cf8e7e39c1434aa9b"
 dependencies = [
  "abi_stable",
  "konst",
