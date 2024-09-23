@@ -544,7 +544,7 @@ dependencies = [
 [[package]]
 name = "native-plugin-lib"
 version = "0.1.0"
-source = "git+https://github.com/MolotovCherry/Native-Plugin-Lib#f422451268eab02ec4f68835e9c8c013fe818036"
+source = "git+https://github.com/MolotovCherry/Native-Plugin-Lib#041e4bacb3f3502e1bd11b172b37b0f0ed236dd3"
 dependencies = [
  "konst",
  "windows",
