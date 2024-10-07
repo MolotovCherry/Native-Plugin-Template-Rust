@@ -35,7 +35,7 @@ unsafe impl Sync for SendHandle {}
 
 // Dll entry point
 #[no_mangle]
-extern "C-unwind" fn DllMain(
+extern "stdcall-unwind" fn DllMain(
     module: HINSTANCE,
     fdw_reason: u32,
     _lpv_reserved: *const c_void,
