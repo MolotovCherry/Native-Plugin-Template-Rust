@@ -29,11 +29,43 @@ declare_plugin! {
     "My Plugin Description"
 }
 
+/// Callback which is executed after the dll is loaded. It is safe to do anything you want in this call.
+/// It is HIGHLY preferred to use Init for everything and only use DllMain for very very basic tasks you
+/// _have to_ use it for. thread init, running, stuff, loadlibrary, etc., literally almost everything
+/// should be done inside Init.
+///
+/// Why? Because actually doing anything inside DllMain is a _very bad idea_.
+/// Deadlocks, UB (even silent UB), and a whole host of other nasty things can happen if you
+/// use DllMain for anything except simple tasks.
+///
+/// See articles below. You have been warned!
+/// https://devblogs.microsoft.com/oldnewthing/20070904-00/?p=25283
+/// https://devblogs.microsoft.com/oldnewthing/20040128-00/?p=40853
+/// https://devblogs.microsoft.com/oldnewthing/20040127-00/?p=40873
+/// https://devblogs.microsoft.com/oldnewthing/20100115-00/?p=15253
+/// https://blog.barthe.ph/2009/07/30/no-stdlib-in-dllmai/
+/// https://learn.microsoft.com/en-us/windows/win32/dlls/dllmain?redirectedfrom=MSDN (see warning section)
+/// https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-best-practices
+///
+/// Currently [YABG3ML](https://github.com/MolotovCherry/Yet-Another-BG3-Native-Mod-Loader) will
+/// execute Init fns. But other mod loaders may not (e.g. native mod loader). Keep this in mind
+/// and do testing, or know that your mod may be only compatible with 1 program.
+#[no_mangle]
+extern "C-unwind" fn Init() {
+    // do stuff
+}
+
 struct SendHandle(HINSTANCE);
 unsafe impl Send for SendHandle {}
 unsafe impl Sync for SendHandle {}
 
-// Dll entry point
+/// Dll entry point
+///
+/// You should NOT use DllMain for _anything_. See documentation on [Init] function for why.
+/// STRONGLY recommended to put this code inside Init() instead.
+///
+/// So why is this template code inside DllMain and not Init? Because other mod loaders may not call
+/// the Init callback. YABG3Ml _does_ call it though. :)
 #[no_mangle]
 extern "stdcall-unwind" fn DllMain(
     module: HINSTANCE,
