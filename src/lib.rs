@@ -21,7 +21,7 @@ use windows::{
         System::{
             Diagnostics::Debug::IsDebuggerPresent,
             SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH},
-            Threading::{OpenMutexW, MUTEX_ALL_ACCESS},
+            Threading::{OpenMutexW, SYNCHRONIZATION_SYNCHRONIZE},
         },
     },
 };
@@ -59,6 +59,8 @@ extern "C-unwind" fn Init() {
     //
     // If you're getting a hang on the game when you start it, it's because you compiled in debug mode,
     // haven't attached a debugger, and this code here is still enabled!
+    //
+    // If you don't want to wait to attach a debugger, then comment or remove this line
     try_debugger_wait();
 
     // Set up a custom panic hook so we can log all panics to logfile
@@ -153,6 +155,8 @@ extern "stdcall-unwind" fn DllMain(
             //
             // If you're getting a hang on the game when you start it, it's because you compiled in debug mode,
             // haven't attached a debugger, and this code here is still enabled!
+            //
+            // If you don't want to wait to attach a debugger, then comment or remove this line
             try_debugger_wait();
 
             // > Call CreateThread. Creating a thread can work if you do not synchronize with
@@ -211,7 +215,7 @@ fn is_yabg3ml() -> bool {
     *CACHE.get_or_init(|| {
         let mutex: OwnedHandleResult = unsafe {
             OpenMutexW(
-                MUTEX_ALL_ACCESS,
+                SYNCHRONIZATION_SYNCHRONIZE,
                 false,
                 w!(r"Global\yet-another-bg3-mod-loader"),
             )
