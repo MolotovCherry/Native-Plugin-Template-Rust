@@ -26,6 +26,7 @@ features = [
     "Win32_Foundation",
     "Win32_System_SystemServices",
     "Win32_System_LibraryLoader",
+    "Win32_System_Threading",
     # for the popup
     "Win32_UI_WindowsAndMessaging",
     # for debugger
