@@ -116,7 +116,11 @@ extern "C-unwind" fn Init() {
 ///
 /// Note that if you do init here AND have your init code in Init(), then you're
 /// effectively doing init TWICE in YABG3ML, which you don't want to do.
-/// You can solve this by using an AtomicBool and checking if it initialized.
+/// We solve this by having a special call which detects if yabg3ml
+/// was the one that responsible for loading this. It's safe to call from DllMain.
+/// It can be used to noop DllMain, but otherwise fallthrough to fallback execution.
+/// We define the Init in the exported Init fn and call that in the fallback here.
+/// So everybody's happy.
 ///
 /// See articles below. You have been warned!
 /// https://devblogs.microsoft.com/oldnewthing/20070904-00/?p=25283
@@ -163,7 +167,7 @@ extern "stdcall-unwind" fn DllMain(
             //   other threads, but it is risky.
             // This also means don't do anything in the thread like LoadLibraryW, etc. Or wait until DllMain is
             // done executing maybe.
-            thread::spawn(|| {
+            _ = thread::spawn(|| {
                 // Set up a custom panic hook so we can log all panics to logfile
                 panic_hook::set_hook();
 
