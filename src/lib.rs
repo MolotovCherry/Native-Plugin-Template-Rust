@@ -21,7 +21,7 @@ use windows::{
         System::{
             Diagnostics::Debug::IsDebuggerPresent,
             SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH},
-            Threading::{OpenMutexW, SYNCHRONIZATION_SYNCHRONIZE},
+            Threading::{OpenEventW, SYNCHRONIZATION_SYNCHRONIZE},
         },
     },
 };
@@ -213,8 +213,8 @@ fn is_yabg3ml() -> bool {
     static CACHE: OnceLock<bool> = OnceLock::new();
 
     *CACHE.get_or_init(|| {
-        let mutex: OwnedHandleResult = unsafe {
-            OpenMutexW(
+        let event: OwnedHandleResult = unsafe {
+            OpenEventW(
                 SYNCHRONIZATION_SYNCHRONIZE,
                 false,
                 w!(r"Global\yet-another-bg3-mod-loader"),
@@ -222,7 +222,7 @@ fn is_yabg3ml() -> bool {
             .to_owned()
         };
 
-        mutex.is_ok()
+        event.is_ok()
     })
 }
 
