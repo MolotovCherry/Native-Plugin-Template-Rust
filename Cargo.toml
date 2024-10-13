@@ -11,7 +11,7 @@ log = "0.4.22"
 simplelog = "0.12.2"
 eyre = "0.6.12"
 directories = "5.0.1"
-backtrace = "0.3.73"
+backtrace = "0.3.74"
 libmem = { version = "5.0.1", features = ["static"] }
 
 serde = { version = "1.0.210", features = ["derive"] }
@@ -20,6 +20,8 @@ native-plugin-lib = { git = "https://github.com/MolotovCherry/Native-Plugin-Lib"
 
 # docs can be found here. different api functions require adding the relevant features
 # https://microsoft.github.io/windows-docs-rs/doc/windows/index.html
+# features search can be found here
+# https://microsoft.github.io/windows-rs/features/#/0.58.0
 [dependencies.windows]
 version = "0.58.0"
 features = [
