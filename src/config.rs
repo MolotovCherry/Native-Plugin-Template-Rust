@@ -6,7 +6,12 @@ use serde::{Deserialize, Serialize};
 
 /// Need to figure out how to make a proper config?
 /// quicktype.io can help you by converting json to Rust
+///
+/// serde(default) will use defaults of lines that're missing in the config;
+/// this can help if users don't have a fully valid config file, and won't
+/// fail to deserialize on them.
 #[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(default)]
 pub struct Config {
     pub opt1: bool,
     pub opt2: String,

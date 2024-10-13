@@ -1,3 +1,5 @@
+use std::iter;
+
 use eyre::Result;
 use windows::{
     core::PCWSTR,
@@ -7,6 +9,10 @@ use windows::{
     },
 };
 
+/// Note, only one console can be shown per process. So this will not work if bg3 already
+/// has spawned a console (perhaps from some other plugin). As such, this is mainly for testing,
+/// but you could also make it a config option which is disabled by default if you want users
+/// to be able to see a console
 pub fn alloc_console(title: &str) -> Result<()> {
     unsafe {
         AllocConsole()?;
@@ -25,7 +31,7 @@ pub fn alloc_console(title: &str) -> Result<()> {
 
     let title = title
         .encode_utf16()
-        .chain(std::iter::once(0u16))
+        .chain(iter::once(0u16))
         .collect::<Vec<_>>();
 
     unsafe {

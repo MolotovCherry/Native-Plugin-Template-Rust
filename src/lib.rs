@@ -47,11 +47,11 @@ declare_plugin! {
 /// _have to_ use it for. thread init, running, stuff, loadlibrary, etc., literally almost everything
 /// should be done inside Init.
 ///
-
-///
 /// Currently [YABG3ML](https://github.com/MolotovCherry/Yet-Another-BG3-Native-Mod-Loader) will
 /// execute Init fns. But other mod loaders may not (e.g. native mod loader). Keep this in mind
-/// and do testing, or know that your mod may be only compatible with 1 program.
+/// and do testing, or know that your mod may be only compatible with 1 program. However, this
+/// template is already set up to run only Init in yabg3ml and fallback to running Init in DllMain
+/// for other ones.
 #[no_mangle]
 extern "C-unwind" fn Init() {
     // here in case Init was our main entry point instead of DllMain
@@ -189,10 +189,13 @@ extern "stdcall-unwind" fn DllMain(
     true
 }
 
-// All of our main plugin code goes here!
-//
-// To log to the logfile, use the log macros: log::debug!(), log::info!(), log::warn!(), log::error!()
-// Recommend to catch and handle potential panics instead of panicking; log instead, it's much cleaner
+/// All of our main plugin code goes here!
+///
+/// To log to the logfile, use the log macros: log::debug!(), log::info!(), log::warn!(), log::error!()
+/// Recommend to catch and handle potential panics instead of panicking; log instead, it's much cleaner
+///
+/// You can use tracing for logging if you prefer a much higher quality logger, but its api is also
+/// much more complex, and as such is harder to learn
 fn entry(module: HINSTANCE) {
     // TODO: Place all your hooking code here
 

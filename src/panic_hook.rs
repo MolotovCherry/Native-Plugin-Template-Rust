@@ -5,6 +5,9 @@ use log::error;
 #[cfg(debug_assertions)]
 use crate::backtrace::CaptureBacktrace;
 
+/// Set the panic hook to log error messages
+///
+/// Is safe to call multiple times since subsequent calls are noops
 pub fn set_hook() {
     static HOOK: Once = Once::new();
 
