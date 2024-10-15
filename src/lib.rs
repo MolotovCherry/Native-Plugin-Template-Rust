@@ -47,10 +47,10 @@ declare_plugin! {
 /// _have to_ use it for. thread init, running, stuff, loadlibrary, etc., literally almost everything
 /// should be done inside Init.
 ///
-/// Currently [YABG3ML](https://github.com/MolotovCherry/Yet-Another-BG3-Native-Mod-Loader) will
+/// Currently [YABG3NML](https://github.com/MolotovCherry/Yet-Another-BG3-Native-Mod-Loader) will
 /// execute Init fns. But other mod loaders may not (e.g. native mod loader). Keep this in mind
 /// and do testing, or know that your mod may be only compatible with 1 program. However, this
-/// template is already set up to run only Init in yabg3ml and fallback to running Init in DllMain
+/// template is already set up to run only Init in yabg3nml and fallback to running Init in DllMain
 /// for other ones.
 #[no_mangle]
 extern "C-unwind" fn Init() {
@@ -115,8 +115,8 @@ extern "C-unwind" fn Init() {
 /// > other threads, but it is risky.
 ///
 /// Note that if you do init here AND have your init code in Init(), then you're
-/// effectively doing init TWICE in YABG3ML, which you don't want to do.
-/// We solve this by having a special call which detects if yabg3ml
+/// effectively doing init TWICE in YABG3NML, which you don't want to do.
+/// We solve this by having a special call which detects if yabg3nml
 /// was the one that responsible for loading this. It's safe to call from DllMain.
 /// It can be used to noop DllMain, but otherwise fallthrough to fallback execution.
 /// We define the Init in the exported Init fn and call that in the fallback here.
@@ -148,10 +148,10 @@ extern "stdcall-unwind" fn DllMain(
 
             _ = MODULE.set(unsafe { ThreadedWrapper::new(module) });
 
-            // noop if it was called from yabg3ml
+            // noop if it was called from yabg3nml
             // because we prefer to call actual init functionality properly instead of in DllMain where there can be problems
             // but we will fallback to calling Init below anyways since we have no choice
-            if is_yabg3ml() {
+            if is_yabg3nml() {
                 return true;
             }
 
@@ -214,9 +214,9 @@ fn entry(module: HINSTANCE) {
     todo!("Implement hooking logic");
 }
 
-/// Detects if yabg3ml injected this dll.
+/// Detects if yabg3nml injected this dll.
 /// This is safe to use from DllMain
-fn is_yabg3ml() -> bool {
+fn is_yabg3nml() -> bool {
     static CACHE: OnceLock<bool> = OnceLock::new();
 
     *CACHE.get_or_init(|| {
@@ -224,7 +224,7 @@ fn is_yabg3ml() -> bool {
             OpenEventW(
                 SYNCHRONIZATION_SYNCHRONIZE,
                 false,
-                w!(r"Global\yet-another-bg3-mod-loader"),
+                w!(r"Global\yet-another-bg3-native-mod-loader"),
             )
             .to_owned()
         };
