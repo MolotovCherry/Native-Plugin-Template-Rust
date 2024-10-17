@@ -2,6 +2,7 @@
 name = "native-plugin-template"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.82"
 
 [lib]
 crate-type = ["cdylib"]

@@ -52,7 +52,7 @@ declare_plugin! {
 /// and do testing, or know that your mod may be only compatible with 1 program. However, this
 /// template is already set up to run only Init in yabg3nml and fallback to running Init in DllMain
 /// for other ones.
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C-unwind" fn Init() {
     // here in case Init was our main entry point instead of DllMain
     // this will only trigger once, so it's ok to put it in DllMain + here
@@ -130,7 +130,7 @@ extern "C-unwind" fn Init() {
 /// https://blog.barthe.ph/2009/07/30/no-stdlib-in-dllmai/
 /// https://learn.microsoft.com/en-us/windows/win32/dlls/dllmain?redirectedfrom=MSDN (see warning section)
 /// https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-best-practices
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "stdcall-unwind" fn DllMain(
     module: HINSTANCE,
     fdw_reason: u32,
