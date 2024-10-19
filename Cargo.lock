@@ -559,7 +559,7 @@ dependencies = [
 [[package]]
 name = "native-plugin-lib"
 version = "0.1.0"
-source = "git+https://github.com/MolotovCherry/Native-Plugin-Lib#6809dc69c1ea8d7974d74c1ebce0d6116acb6181"
+source = "git+https://github.com/MolotovCherry/Native-Plugin-Lib#4b83f978664895b88a2d34f3d3b22d8dbfca4515"
 dependencies = [
  "eyre",
  "konst",
@@ -851,9 +851,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.129"
+version = "1.0.131"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6dbcf9b78a125ee667ae19388837dd12294b858d101fdd393cb9d5501ef09eb2"
+checksum = "67d42a0bd4ac281beff598909bb56a86acaf979b84483e1c79c10dcaf98f8cf3"
 dependencies = [
  "itoa",
  "memchr",
