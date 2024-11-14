@@ -47,15 +47,16 @@ declare_plugin! {
 /// _have to_ use it for. thread init, running, stuff, loadlibrary, etc., literally almost everything
 /// should be done inside Init.
 ///
-/// Currently [YABG3NML](https://github.com/MolotovCherry/Yet-Another-BG3-Native-Mod-Loader) will
-/// execute Init fns. But other mod loaders may not (e.g. native mod loader). Keep this in mind
-/// and do testing, or know that your mod may be only compatible with 1 program. However, this
+/// [YABG3NML](https://github.com/MolotovCherry/Yet-Another-BG3-Native-Mod-Loader) will
+/// natively call Init. But other mod loaders may not (e.g. native mod loader). Keep this in mind
+/// and do testing. This Init fn also executes in a new thread from DllMain due to compatibility reasons.
+/// So while doing anything here is safe from yabg3nml, it is not necessarily from DllMain. This
 /// template is already set up to run only Init in yabg3nml and fallback to running Init in DllMain
 /// for other ones.
 #[unsafe(no_mangle)]
 extern "C-unwind" fn Init() {
     // here in case Init was our main entry point instead of DllMain
-    // this will only trigger once, so it's ok to put it in DllMain + here
+    // this will only trigger once, so it's safe to call multiple times (DllMain + here)
     //
     // If you're getting a hang on the game when you start it, it's because you compiled in debug mode,
     // haven't attached a debugger, and this code here is still enabled!
@@ -64,6 +65,7 @@ extern "C-unwind" fn Init() {
     try_debugger_wait();
 
     // Set up a custom panic hook so we can log all panics to logfile
+    // This is also only triggered once. Safe to call it multiple times.
     panic_hook::set_hook();
 
     // Note: While it's technically safe to panic across FFI with C-unwind ABI, I STRONGLY recommend to
@@ -155,26 +157,12 @@ extern "stdcall-unwind" fn DllMain(
                 return true;
             }
 
-            // Wait for debugger if in debug mode. Is a noop in release mode.
-            //
-            // If you're getting a hang on the game when you start it, it's because you compiled in debug mode,
-            // haven't attached a debugger, and this code here is still enabled!
-            //
-            // If you don't want to wait to attach a debugger, then comment or remove this line
-            try_debugger_wait();
-
             // > Call CreateThread. Creating a thread can work if you do not synchronize with
             //   other threads, but it is risky.
             // This also means don't do anything in the thread like LoadLibraryW, etc. Or wait until DllMain is
             // done executing maybe.
             _ = thread::spawn(|| {
-                // Set up a custom panic hook so we can log all panics to logfile
-                panic_hook::set_hook();
-
-                // panic is handled in panic handler
-                _ = panic::catch_unwind(|| {
-                    Init();
-                });
+                Init();
             });
         }
 
