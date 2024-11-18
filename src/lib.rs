@@ -7,7 +7,7 @@ mod paths;
 mod popup;
 mod utils;
 
-use std::{ffi::c_void, panic, sync::Once, time};
+use std::{ffi::c_void, panic, time};
 use std::{sync::OnceLock, thread};
 
 use eyre::{Context, Error};
@@ -55,15 +55,6 @@ declare_plugin! {
 /// for other ones.
 #[unsafe(no_mangle)]
 extern "C-unwind" fn Init() {
-    // here in case Init was our main entry point instead of DllMain
-    // this will only trigger once, so it's safe to call multiple times (DllMain + here)
-    //
-    // If you're getting a hang on the game when you start it, it's because you compiled in debug mode,
-    // haven't attached a debugger, and this code here is still enabled!
-    //
-    // If you don't want to wait to attach a debugger, then comment or remove this line
-    try_debugger_wait();
-
     // Set up a custom panic hook so we can log all panics to logfile
     // This is also only triggered once. Safe to call it multiple times.
     panic_hook::set_hook();
@@ -142,6 +133,18 @@ extern "stdcall-unwind" fn DllMain(
         DLL_PROCESS_ATTACH => {
             // basic dll init code here
 
+            // If you're getting a hang on the game when you start it, it's because you compiled in debug mode,
+            // haven't attached a debugger, and this code here is still enabled!
+            //
+            // If you don't want to wait to ever attach a debugger, then comment or remove this line
+            if cfg!(debug_assertions) {
+                let is_debugger_present = || unsafe { IsDebuggerPresent().as_bool() };
+                while !is_debugger_present() {
+                    // 60hz polling
+                    thread::sleep(time::Duration::from_millis(16));
+                }
+            }
+
             // Note about calling `DisableThreadLibraryCalls`. By default crt static is selected for this project
             // (see .cargo/config.toml), so you should turn it off if you call this function according to the ms docs.
             //
@@ -219,22 +222,4 @@ fn is_yabg3nml() -> bool {
 
         event.is_ok()
     })
-}
-
-/// Waits until debugger is present. Only compiles into debug mode.
-/// This is safe to call multiple times. Only the initial call
-/// will do the debug check. Calls after that are noops.
-fn try_debugger_wait() {
-    if cfg!(debug_assertions) {
-        static DEBUG: Once = Once::new();
-
-        DEBUG.call_once(|| {
-            let is_debugger_present = || unsafe { IsDebuggerPresent().as_bool() };
-
-            while !is_debugger_present() {
-                // 60hz polling
-                thread::sleep(time::Duration::from_millis(16));
-            }
-        });
-    }
 }
