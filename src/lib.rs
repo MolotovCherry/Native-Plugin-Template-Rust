@@ -130,7 +130,7 @@ extern "stdcall-unwind" fn DllMain(
     _lpv_reserved: *const c_void,
 ) -> bool {
     match fdw_reason {
-        DLL_PROCESS_ATTACH => {
+        DLL_PROCESS_ATTACH => 'attach: {
             // basic dll init code here
 
             // If you're getting a hang on the game when you start it, it's because you compiled in debug mode,
@@ -157,7 +157,7 @@ extern "stdcall-unwind" fn DllMain(
             // because we prefer to call actual init functionality properly instead of in DllMain where there can be problems
             // but we will fallback to calling Init below anyways since we have no choice
             if is_yabg3nml() {
-                return true;
+                break 'attach;
             }
 
             // > Call CreateThread. Creating a thread can work if you do not synchronize with

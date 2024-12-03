@@ -3,16 +3,23 @@ use std::{
     fs,
     os::windows::prelude::OsStringExt,
     path::{Path, PathBuf},
+    sync::OnceLock,
 };
 
-use eyre::{bail, eyre, Result};
+use eyre::{bail, OptionExt as _, Result};
 use windows::Win32::{
     Foundation::{GetLastError, HINSTANCE, MAX_PATH},
     System::LibraryLoader::GetModuleFileNameW,
 };
 
-/// Get path to dll `<dll_dir>\myplugin.dll`
-pub fn get_dll_path(module: HINSTANCE) -> Result<PathBuf> {
+/// Get path to dll's parent dir
+pub fn get_dll_dir(module: HINSTANCE) -> Result<&'static PathBuf> {
+    static PATH: OnceLock<PathBuf> = OnceLock::new();
+
+    if let Some(path) = PATH.get() {
+        return Ok(path);
+    }
+
     const PATH_SIZE: usize = (MAX_PATH * 2) as usize;
 
     // create pre-allocated stack array of correct size
@@ -27,25 +34,25 @@ pub fn get_dll_path(module: HINSTANCE) -> Result<PathBuf> {
         bail!("{err}");
     }
 
-    let path = OsString::from_wide(&path[..written_len]);
-    Ok(PathBuf::from(path))
-}
+    let path = {
+        let os = OsString::from_wide(&path[..written_len]);
+        PathBuf::from(os)
+    };
 
-/// Get path to dll's parent dir
-pub fn get_dll_dir(module: HINSTANCE) -> Result<PathBuf> {
-    let dll_folder = get_dll_path(module)?
+    let dll_folder = path
         .parent()
-        .ok_or(eyre!("Failed to get parent of dll"))?
+        .ok_or_eyre("Failed to get parent of dll")?
         .to_path_buf();
 
-    Ok(dll_folder)
+    PATH.set(dll_folder).unwrap();
+
+    Ok(PATH.get().unwrap())
 }
 
 /// Get path to `<dll_dir>\logs\`
 /// Also creates `logs` dir if it doesn't exist
 pub fn get_dll_logs_dir(module: HINSTANCE) -> Result<PathBuf> {
-    let mut logs_dir = get_dll_dir(module)?;
-    logs_dir.push("logs");
+    let logs_dir = get_dll_dir(module)?.join("logs");
 
     if !logs_dir.exists() {
         fs::create_dir(&logs_dir)?;
