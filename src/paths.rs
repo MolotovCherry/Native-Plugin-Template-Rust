@@ -25,7 +25,7 @@ pub fn get_dll_dir(module: HINSTANCE) -> Result<&'static PathBuf> {
     // create pre-allocated stack array of correct size
     let mut path = vec![0; PATH_SIZE];
     // returns how many bytes written
-    let written_len = unsafe { GetModuleFileNameW(module, &mut path) as usize };
+    let written_len = unsafe { GetModuleFileNameW(Some(module.into()), &mut path) as usize };
 
     // bubble up error if there was any, for example, ERROR_INSUFFICIENT_BUFFER
     let err = unsafe { GetLastError() };

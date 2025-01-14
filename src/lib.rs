@@ -202,7 +202,7 @@ fn entry(module: HINSTANCE) {
         get_dll_dir_filepath(module, "my-config.toml").expect("Failed to find config path");
     let config = Config::load(config_path).expect("Failed to load config");
 
-    todo!("Implement hooking logic");
+    todo!("Implement libmem/memory lib hooking logic");
 }
 
 /// Detects if yabg3nml injected this dll.
