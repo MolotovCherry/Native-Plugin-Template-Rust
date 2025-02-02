@@ -24,7 +24,7 @@ pub fn set_hook() {
                 // In case you want to make panics much easier to see
                 //crate::popup::display_popup("Panic", &message, crate::popup::MessageBoxIcon::Error);
 
-                message = format!("{info}\n\nstack backtrace:\n{}", CaptureBacktrace);
+                message = format!("{info}\n\nstack backtrace:\n{CaptureBacktrace}");
             }
 
             // Dump panic info to logfile

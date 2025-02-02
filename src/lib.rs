@@ -46,15 +46,15 @@ declare_plugin! {
 }
 
 /// Callback which is executed after the dll is loaded. It is safe to do anything you want in this call.
-/// It is HIGHLY preferred to use Init for everything and only use DllMain for very very basic tasks you
+/// It is HIGHLY preferred to use Init for everything and only use `DllMain` for very very basic tasks you
 /// _have to_ use it for. thread init, running, stuff, loadlibrary, etc., literally almost everything
 /// should be done inside Init.
 ///
 /// [YABG3NML](https://github.com/MolotovCherry/Yet-Another-BG3-Native-Mod-Loader) will
 /// natively call Init. But other mod loaders may not (e.g. native mod loader). Keep this in mind
-/// and do testing. This Init fn also executes in a new thread from DllMain due to compatibility reasons.
-/// So while doing anything here is safe from yabg3nml, it is not necessarily from DllMain. This
-/// template is already set up to run only Init in yabg3nml and fallback to running Init in DllMain
+/// and do testing. This Init fn also executes in a new thread from `DllMain` due to compatibility reasons.
+/// So while doing anything here is safe from yabg3nml, it is not necessarily from `DllMain`. This
+/// template is already set up to run only Init in yabg3nml and fallback to running Init in `DllMain`
 /// for other ones.
 #[unsafe(no_mangle)]
 extern "C-unwind" fn Init() {
@@ -103,38 +103,38 @@ extern "C-unwind" fn Init() {
 
 /// Dll entry point
 ///
-/// You should NOT use DllMain for _anything_.
+/// You should NOT use `DllMain` for _anything_.
 ///
-/// Why? Because actually doing anything inside DllMain is a _very bad idea_.
+/// Why? Because actually doing anything inside `DllMain` is a _very bad idea_.
 /// Deadlocks, UB (even silent UB), and a whole host of other nasty things can happen if you
-/// use DllMain for anything except simple tasks.
+/// use `DllMain` for anything except simple tasks.
 ///
 /// > The entry-point function should perform only simple initialization or termination tasks.
 ///
-/// https://learn.microsoft.com/en-us/windows/win32/dlls/dllmain#remarks
+/// <https://learn.microsoft.com/en-us/windows/win32/dlls/dllmain#remarks>
 ///
 /// Unfortunately though, some mod loaders may only execute this entry point.
 /// If the mod loader you're designing for only loads from this entry point
-/// then you may have to launch init code from a new thread inside DllMain.
+/// then you may have to launch init code from a new thread inside `DllMain`.
 /// > Call CreateThread. Creating a thread can work if you do not synchronize with
 /// > other threads, but it is risky.
 ///
-/// Note that if you do init here AND have your init code in Init(), then you're
+/// Note that if you do init here AND have your init code in `Init()`, then you're
 /// effectively doing init TWICE in YABG3NML, which you don't want to do.
 /// We solve this by having a special call which detects if yabg3nml
-/// was the one that responsible for loading this. It's safe to call from DllMain.
-/// It can be used to noop DllMain, but otherwise fallthrough to fallback execution.
+/// was the one that responsible for loading this. It's safe to call from `DllMain`.
+/// It can be used to noop `DllMain`, but otherwise fallthrough to fallback execution.
 /// We define the Init in the exported Init fn and call that in the fallback here.
 /// So everybody's happy.
 ///
 /// See articles below. You have been warned!
-/// https://devblogs.microsoft.com/oldnewthing/20070904-00/?p=25283
-/// https://devblogs.microsoft.com/oldnewthing/20040128-00/?p=40853
-/// https://devblogs.microsoft.com/oldnewthing/20040127-00/?p=40873
-/// https://devblogs.microsoft.com/oldnewthing/20100115-00/?p=15253
-/// https://blog.barthe.ph/2009/07/30/no-stdlib-in-dllmai/
-/// https://learn.microsoft.com/en-us/windows/win32/dlls/dllmain?redirectedfrom=MSDN (see warning section)
-/// https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-best-practices
+/// <https://devblogs.microsoft.com/oldnewthing/20070904-00/?p=25283>
+/// <https://devblogs.microsoft.com/oldnewthing/20040128-00/?p=40853>
+/// <https://devblogs.microsoft.com/oldnewthing/20040127-00/?p=40873>
+/// <https://devblogs.microsoft.com/oldnewthing/20100115-00/?p=15253>
+/// <https://blog.barthe.ph/2009/07/30/no-stdlib-in-dllmai/>
+/// <https://learn.microsoft.com/en-us/windows/win32/dlls/dllmain?redirectedfrom=MSDN> (see warning section)
+/// <https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-best-practices>
 #[unsafe(no_mangle)]
 extern "stdcall-unwind" fn DllMain(
     module: HINSTANCE,
@@ -194,7 +194,7 @@ extern "stdcall-unwind" fn DllMain(
 
 /// All of our main plugin code goes here!
 ///
-/// To log to the logfile, use the log macros: log::debug!(), log::info!(), log::warn!(), log::error!()
+/// To log to the logfile, use the log macros: `log::debug!()`, `log::info!()`, `log::warn!()`, `log::error!()`
 /// Recommend to catch and handle potential panics instead of panicking; log instead, it's much cleaner
 ///
 /// You can use tracing for logging if you prefer a much higher quality logger, but its api is also
@@ -219,7 +219,7 @@ fn entry(module: HINSTANCE) {
 }
 
 /// Detects if yabg3nml injected this dll.
-/// This is safe to use from DllMain
+/// This is safe to use from `DllMain`
 fn is_yabg3nml() -> bool {
     static CACHE: OnceLock<bool> = OnceLock::new();
 
