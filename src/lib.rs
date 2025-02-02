@@ -152,8 +152,8 @@ extern "stdcall-unwind" fn DllMain(
                 }
             }
 
-            // Note about calling `DisableThreadLibraryCalls`. By default crt static is selected for this project
-            // (see .cargo/config.toml), so you should turn it off if you call this function according to the ms docs.
+            // Note about calling `DisableThreadLibraryCalls`. By default crt static is enabled (see .cargo/config.toml),
+            // so you should not call this function unless you remove `-Ctarget-feature=+crt-static` from the file.
             //
             // > Consider calling DisableThreadLibraryCalls when receiving DLL_PROCESS_ATTACH, unless your DLL is
             // > linked with static C run-time library (CRT).
