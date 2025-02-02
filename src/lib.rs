@@ -7,7 +7,7 @@ mod paths;
 mod popup;
 mod utils;
 
-use std::{ffi::c_void, panic, time};
+use std::{ffi::c_void, mem, panic, time};
 use std::{sync::OnceLock, thread};
 
 use eyre::{Context, Error};
@@ -82,10 +82,17 @@ extern "C-unwind" fn Init() {
         Ok::<_, Error>(())
     });
 
-    // If there was no panic, but error was bubbled up, then log the error
-    // we don't handle panics cause the panic hook already did
-    if let Ok(Err(e)) = result {
-        error!("{e}");
+    match result {
+        // all good
+        Ok(Ok(_)) => (),
+        // there was no panic, but an error was bubbled up, so log the error
+        Ok(Err(e)) => error!("{e}"),
+        // dropping the error _may_ panic, so we should forget it.
+        // > Finally, be careful in how you drop the result of this function. If it is Err, it
+        // > contains the panic payload, and dropping that may in turn panic!
+        //
+        // we also don't need to handle this panic cause our custom panic hook already did
+        Err(e) => mem::forget(e),
     }
 }
 
