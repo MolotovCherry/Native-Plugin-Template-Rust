@@ -11,6 +11,9 @@ use std::{ffi::c_void, mem, panic, time};
 use std::{sync::OnceLock, thread};
 
 use eyre::{Context, Error};
+// this imports all of libmem's functions so you can use them
+// alternatively, you can import the specific ones you want to use
+// instead of a glob import
 use libmem::*;
 use log::{error, LevelFilter};
 use native_plugin_lib::declare_plugin;
@@ -87,7 +90,9 @@ extern "C-unwind" fn Init() {
         Ok(Ok(_)) => (),
         // there was no panic, but an error was bubbled up, so log the error
         Ok(Err(e)) => error!("{e}"),
-        // dropping the error _may_ panic, so we should forget it.
+        // a panic was caught!
+        //
+        // dropping the panic payload may itself panic, so we should forget it.
         // > Finally, be careful in how you drop the result of this function. If it is Err, it
         // > contains the panic payload, and dropping that may in turn panic!
         //
@@ -208,6 +213,7 @@ fn entry(module: HINSTANCE) {
     let config_path =
         get_dll_dir_filepath(module, "my-config.toml").expect("Failed to find config path");
     let config = Config::load(config_path).expect("Failed to load config");
+    // TODO: Do something with config
 
     todo!("Implement libmem/memory lib hooking logic");
 }
