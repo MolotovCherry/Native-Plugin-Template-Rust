@@ -15,12 +15,11 @@ use windows::Win32::{
 /// Get path to dll's parent dir
 pub fn get_dll_dir(module: HINSTANCE) -> Result<&'static PathBuf> {
     static PATH: OnceLock<PathBuf> = OnceLock::new();
+    const PATH_SIZE: usize = (MAX_PATH * 2) as usize;
 
     if let Some(path) = PATH.get() {
         return Ok(path);
     }
-
-    const PATH_SIZE: usize = (MAX_PATH * 2) as usize;
 
     // create pre-allocated stack array of correct size
     let mut path = vec![0; PATH_SIZE];
