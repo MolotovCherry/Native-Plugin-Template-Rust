@@ -15,24 +15,24 @@ use eyre::{Context, Error};
 // alternatively, you can import the specific ones you want to use
 // instead of a glob import
 use libmem::*;
-use log::{error, LevelFilter};
+use log::{LevelFilter, error};
 use native_plugin_lib::declare_plugin;
 use windows::{
-    core::w,
     Win32::{
-        Foundation::HINSTANCE,
+        Foundation::{HINSTANCE, TRUE},
         System::{
             Diagnostics::Debug::IsDebuggerPresent,
             SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH},
             Threading::{OpenEventW, SYNCHRONIZATION_SYNCHRONIZE},
         },
     },
+    core::{BOOL, w},
 };
 
 use config::Config;
 use logging::{debug_console, setup_logging};
 use paths::get_dll_dir_filepath;
-use popup::{display_popup, MessageBoxIcon};
+use popup::{MessageBoxIcon, display_popup};
 use utils::{OwnedHandleConvert, OwnedHandleResult, ThreadedWrapper};
 
 static MODULE: OnceLock<ThreadedWrapper<HINSTANCE>> = OnceLock::new();
@@ -140,7 +140,7 @@ extern "stdcall-unwind" fn DllMain(
     module: HINSTANCE,
     fdw_reason: u32,
     _lpv_reserved: *const c_void,
-) -> bool {
+) -> BOOL {
     match fdw_reason {
         DLL_PROCESS_ATTACH => 'attach: {
             // basic dll init code here
@@ -189,7 +189,7 @@ extern "stdcall-unwind" fn DllMain(
         _ => (),
     }
 
-    true
+    TRUE
 }
 
 /// All of our main plugin code goes here!
