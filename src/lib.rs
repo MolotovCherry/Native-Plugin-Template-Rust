@@ -200,8 +200,6 @@ extern "stdcall-unwind" fn DllMain(
 /// You can use tracing for logging if you prefer a much higher quality logger, but its api is also
 /// much more complex, and as such is harder to learn
 fn entry(module: HINSTANCE) {
-    // TODO: Place all your hooking code here
-
     // Show the hook was injected. DO NOT popup in production code! This is just for a POC
     display_popup(
         "Success",

@@ -31,7 +31,7 @@ pub fn alloc_console(title: &str) -> Result<()> {
 
     let title = title
         .encode_utf16()
-        .chain(iter::once(0u16))
+        .chain(iter::once(0))
         .collect::<Vec<_>>();
 
     unsafe {
