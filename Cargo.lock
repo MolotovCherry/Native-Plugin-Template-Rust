@@ -705,7 +705,7 @@ dependencies = [
 [[package]]
 name = "native-plugin-lib"
 version = "0.1.0"
-source = "git+https://github.com/MolotovCherry/Native-Plugin-Lib#1d854307fb130c68d73fb889caca10be71c47d8a"
+source = "git+https://github.com/MolotovCherry/Native-Plugin-Lib#2cbafdf77c748008f5efbdce66e4b588e8a70a2d"
 dependencies = [
  "byteorder",
  "eyre",
