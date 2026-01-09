@@ -7,15 +7,15 @@ edition = "2024"
 crate-type = ["cdylib"]
 
 [dependencies]
-log = "0.4.27"
+log = "0.4.29"
 simplelog = "0.12.2"
 eyre = "0.6.12"
 directories = "6.0.0"
-backtrace = "0.3.74"
-libmem = { version = "5.0.4", features = ["static"] }
+backtrace = "0.3.76"
+libmem = { version = "5.1.4", features = ["static"] }
 
-serde = { version = "1.0.219", features = ["derive"] }
-toml = "0.8.20"
+serde = { version = "1.0.228", features = ["derive"] }
+toml = "0.9.11"
 native-plugin-lib = { git = "https://github.com/MolotovCherry/Native-Plugin-Lib" }
 
 # docs can be found here. different api functions require adding the relevant features
@@ -23,7 +23,7 @@ native-plugin-lib = { git = "https://github.com/MolotovCherry/Native-Plugin-Lib"
 # features search can be found here
 # https://microsoft.github.io/windows-rs/features/#/0.61.0
 [dependencies.windows]
-version = "0.61.1"
+version = "0.62.2"
 features = [
     "Win32_Foundation",
     "Win32_System_SystemServices",
