@@ -10,6 +10,7 @@ mod utils;
 use std::{ffi::c_void, mem, panic, time};
 use std::{sync::OnceLock, thread};
 
+use extern_c::extern_system;
 use eyre::{Context, Error};
 // this imports all of libmem's functions so you can use them
 // alternatively, you can import the specific ones you want to use
@@ -23,7 +24,10 @@ use windows::{
         System::{
             Diagnostics::Debug::IsDebuggerPresent,
             SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH},
-            Threading::{OpenEventW, SYNCHRONIZATION_SYNCHRONIZE},
+            Threading::{
+                CreateThread, OpenEventW, SYNCHRONIZATION_SYNCHRONIZE,
+                THREAD_CREATE_RUN_IMMEDIATELY,
+            },
         },
     },
     core::{BOOL, w},
@@ -176,9 +180,22 @@ extern "system-unwind" fn DllMain(
             //   other threads, but it is risky.
             // This also means don't do anything in the thread like LoadLibraryW, etc. Or wait until DllMain is
             // done executing maybe.
-            _ = thread::spawn(|| {
-                Init();
-            });
+
+            // we do not use thread::spawn because we have no guarantee
+            // what will change in its implementation; calling this directly gives us more safety
+            _ = unsafe {
+                CreateThread(
+                    None,
+                    0,
+                    Some(extern_system(|_: *mut c_void| {
+                        Init();
+                        0
+                    })),
+                    None,
+                    THREAD_CREATE_RUN_IMMEDIATELY,
+                    None,
+                )
+            };
         }
 
         DLL_PROCESS_DETACH => {

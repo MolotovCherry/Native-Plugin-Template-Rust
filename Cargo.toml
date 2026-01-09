@@ -12,6 +12,7 @@ simplelog = "0.12.2"
 eyre = "0.6.12"
 directories = "6.0.0"
 backtrace = "0.3.76"
+extern-c = "0.1.1-rc1"
 libmem = { version = "5.1.4", features = ["static"] }
 
 serde = { version = "1.0.228", features = ["derive"] }
@@ -28,6 +29,7 @@ features = [
     "Win32_Foundation",
     "Win32_System_SystemServices",
     "Win32_System_LibraryLoader",
+    "Win32_Security",
     "Win32_System_Threading",
     # for the popup
     "Win32_UI_WindowsAndMessaging",
