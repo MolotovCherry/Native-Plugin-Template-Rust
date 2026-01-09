@@ -136,7 +136,7 @@ extern "C-unwind" fn Init() {
 /// <https://learn.microsoft.com/en-us/windows/win32/dlls/dllmain?redirectedfrom=MSDN> (see warning section)
 /// <https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-best-practices>
 #[unsafe(no_mangle)]
-extern "stdcall-unwind" fn DllMain(
+extern "system-unwind" fn DllMain(
     module: HINSTANCE,
     fdw_reason: u32,
     _lpv_reserved: *const c_void,
