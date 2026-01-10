@@ -1,38 +1,7 @@
-use std::ops::Deref;
+use windows::{Win32::Foundation::HANDLE, core::Owned};
 
-use windows::{
-    core::{self, Free},
-    Win32::Foundation::HANDLE,
-};
-
-pub type OwnedHandleResult = core::Result<OwnedHandle>;
-
-#[derive(Debug)]
-pub struct OwnedHandle(HANDLE);
-
-impl From<HANDLE> for OwnedHandle {
-    fn from(value: HANDLE) -> Self {
-        Self(value)
-    }
-}
-
-impl Drop for OwnedHandle {
-    fn drop(&mut self) {
-        unsafe {
-            self.0.free();
-        }
-    }
-}
-
-pub trait OwnedHandleConvert {
-    fn to_owned(self) -> core::Result<OwnedHandle>;
-}
-
-impl<T: Into<OwnedHandle>> OwnedHandleConvert for core::Result<T> {
-    fn to_owned(self) -> core::Result<OwnedHandle> {
-        self.map(|t| t.into())
-    }
-}
+/// Owned HANDLE that CloseHandle on Drop
+pub type OwnedHandle = Owned<HANDLE>;
 
 pub struct ThreadedWrapper<T>(T);
 unsafe impl<T> Send for ThreadedWrapper<T> {}
@@ -40,16 +9,12 @@ unsafe impl<T> Sync for ThreadedWrapper<T> {}
 
 impl<T> ThreadedWrapper<T> {
     /// # Safety
-    /// Caller asserts that T is safe to use in Send+Sync contexts
+    /// Caller asserts that T is Send+Sync safe
     pub unsafe fn new(t: T) -> Self {
         Self(t)
     }
-}
 
-impl<T> Deref for ThreadedWrapper<T> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
+    pub fn inner(&self) -> &T {
         &self.0
     }
 }

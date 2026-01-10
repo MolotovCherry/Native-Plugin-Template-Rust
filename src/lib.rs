@@ -11,13 +11,14 @@ use std::{ffi::c_void, mem, panic, time};
 use std::{sync::OnceLock, thread};
 
 use extern_c::extern_system;
-use eyre::{Context, Error};
+use eyre::{Context, ContextCompat, Error};
 // this imports all of libmem's functions so you can use them
 // alternatively, you can import the specific ones you want to use
 // instead of a glob import
 use libmem::*;
 use log::{LevelFilter, error};
 use native_plugin_lib::declare_plugin;
+use windows::Win32::Foundation::CloseHandle;
 use windows::{
     Win32::{
         Foundation::{HINSTANCE, TRUE},
@@ -37,7 +38,7 @@ use config::Config;
 use logging::{debug_console, setup_logging};
 use paths::get_dll_dir_filepath;
 use popup::{MessageBoxIcon, display_popup};
-use utils::{OwnedHandleConvert, OwnedHandleResult, ThreadedWrapper};
+use utils::ThreadedWrapper;
 
 static MODULE: OnceLock<ThreadedWrapper<HINSTANCE>> = OnceLock::new();
 
@@ -47,6 +48,30 @@ declare_plugin! {
     "MyPlugin",
     "Author",
     "My Plugin Description"
+}
+
+/// All of our main plugin code goes here!
+///
+/// To log to the logfile, use the log macros: `log::debug!()`, `log::info!()`, `log::warn!()`, `log::error!()`
+/// Recommend to catch and handle potential panics instead of panicking; log instead, it's much cleaner
+///
+/// You can use tracing for logging if you prefer a much higher quality logger, but its api is also
+/// much more complex, and as such is harder to learn
+fn entry(module: HINSTANCE) {
+    // Show the hook was injected. DO NOT popup in production code! This is just for a POC
+    display_popup(
+        "Success",
+        "Plugin successfully injected",
+        MessageBoxIcon::Information,
+    );
+
+    // load a config
+    let config_path =
+        get_dll_dir_filepath(module, "my-config.toml").expect("Failed to find config path");
+    let config = Config::load(config_path).expect("Failed to load config");
+    // TODO: Do something with config
+
+    todo!("Implement libmem/memory lib hooking logic");
 }
 
 /// Callback which is executed after the dll is loaded. It is safe to do anything you want in this call.
@@ -74,7 +99,10 @@ extern "C-unwind" fn Init() {
     // if for any reason we can't actually log the panic, we *could* popup a
     // messagebox instead (for debugging use only of course)
     let result = panic::catch_unwind(|| {
-        let module = **MODULE.get().expect("HINSTANCE was set via DllMain");
+        let module = *MODULE
+            .get()
+            .context("HINSTANCE not set in DllMain")?
+            .inner();
 
         // set up our actual log file handling
         if cfg!(debug_assertions) {
@@ -119,7 +147,7 @@ extern "C-unwind" fn Init() {
 ///
 /// Unfortunately though, some mod loaders may only execute this entry point.
 /// If the mod loader you're designing for only loads from this entry point
-/// then you may have to launch init code from a new thread inside `DllMain`.
+/// then you have to launch init code from a new thread inside `DllMain`.
 /// > Call CreateThread. Creating a thread can work if you do not synchronize with
 /// > other threads, but it is risky.
 ///
@@ -178,8 +206,6 @@ extern "system-unwind" fn DllMain(
 
             // > Call CreateThread. Creating a thread can work if you do not synchronize with
             //   other threads, but it is risky.
-            // This also means don't do anything in the thread like LoadLibraryW, etc. Or wait until DllMain is
-            // done executing maybe.
 
             // we do not use thread::spawn because we have no guarantee
             // what will change in its implementation; calling this directly gives us more safety
@@ -199,8 +225,7 @@ extern "system-unwind" fn DllMain(
         }
 
         DLL_PROCESS_DETACH => {
-            // deinit code here
-            todo!("deinit code here");
+            // TODO: deinit code here
         }
 
         _ => (),
@@ -209,45 +234,25 @@ extern "system-unwind" fn DllMain(
     TRUE
 }
 
-/// All of our main plugin code goes here!
-///
-/// To log to the logfile, use the log macros: `log::debug!()`, `log::info!()`, `log::warn!()`, `log::error!()`
-/// Recommend to catch and handle potential panics instead of panicking; log instead, it's much cleaner
-///
-/// You can use tracing for logging if you prefer a much higher quality logger, but its api is also
-/// much more complex, and as such is harder to learn
-fn entry(module: HINSTANCE) {
-    // Show the hook was injected. DO NOT popup in production code! This is just for a POC
-    display_popup(
-        "Success",
-        "Plugin successfully injected",
-        MessageBoxIcon::Information,
-    );
-
-    // load a config
-    let config_path =
-        get_dll_dir_filepath(module, "my-config.toml").expect("Failed to find config path");
-    let config = Config::load(config_path).expect("Failed to load config");
-    // TODO: Do something with config
-
-    todo!("Implement libmem/memory lib hooking logic");
-}
-
 /// Detects if yabg3nml injected this dll.
 /// This is safe to use from `DllMain`
 fn is_yabg3nml() -> bool {
     static CACHE: OnceLock<bool> = OnceLock::new();
 
     *CACHE.get_or_init(|| {
-        let event: OwnedHandleResult = unsafe {
+        match unsafe {
             OpenEventW(
                 SYNCHRONIZATION_SYNCHRONIZE,
                 false,
                 w!(r"Global\yet-another-bg3-native-mod-loader"),
             )
-            .to_owned()
-        };
+        } {
+            Ok(h) => {
+                _ = unsafe { CloseHandle(h) };
+                true
+            }
 
-        event.is_ok()
+            Err(_) => false,
+        }
     })
 }
