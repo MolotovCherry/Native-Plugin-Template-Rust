@@ -7,8 +7,7 @@ mod paths;
 mod popup;
 mod utils;
 
-use std::{ffi::c_void, mem, panic, time};
-use std::{sync::OnceLock, thread};
+use std::{ffi::c_void, mem, panic, sync::OnceLock, thread, time};
 
 use extern_c::extern_system;
 use eyre::{Context, ContextCompat, Error};
@@ -18,10 +17,9 @@ use eyre::{Context, ContextCompat, Error};
 use libmem::*;
 use log::{LevelFilter, error};
 use native_plugin_lib::declare_plugin;
-use windows::Win32::Foundation::CloseHandle;
 use windows::{
     Win32::{
-        Foundation::{HINSTANCE, TRUE},
+        Foundation::{CloseHandle, HINSTANCE, TRUE},
         System::{
             Diagnostics::Debug::IsDebuggerPresent,
             SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH},
