@@ -9,7 +9,6 @@ mod utils;
 
 use std::{ffi::c_void, mem, panic, sync::OnceLock, thread, time};
 
-use extern_c::extern_system;
 use eyre::{Context, ContextCompat, Error};
 // this imports all of libmem's functions so you can use them
 // alternatively, you can import the specific ones you want to use
@@ -201,16 +200,18 @@ extern "system" fn DllMain(
                 // > Call CreateThread. Creating a thread can work if you do not synchronize with
                 //   other threads, but it is risky.
 
+                extern "system" fn bootstrap(_: *mut c_void) -> u32 {
+                    Init();
+                    0
+                }
+
                 // we do not use thread::spawn because we have no guarantee what will change in
                 // its implementation; calling this directly is safer
                 _ = unsafe {
                     CreateThread(
                         None,
                         0,
-                        Some(extern_system(|_: *mut c_void| {
-                            Init();
-                            0
-                        })),
+                        Some(bootstrap),
                         None,
                         THREAD_CREATE_RUN_IMMEDIATELY,
                         None,
