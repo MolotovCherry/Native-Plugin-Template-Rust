@@ -85,6 +85,18 @@ fn entry(module: HINSTANCE) {
 /// for other ones.
 #[unsafe(no_mangle)]
 extern "C" fn Init() {
+    // If you're getting a hang on the game when you start it, it's because you compiled in debug mode,
+    // haven't attached a debugger, and this code here is still enabled!
+    //
+    // If you don't want to wait to ever attach a debugger, then comment or remove this line
+    if cfg!(debug_assertions) {
+        let is_debugger_present = || unsafe { IsDebuggerPresent().as_bool() };
+        while !is_debugger_present() {
+            // 60hz polling
+            thread::sleep(time::Duration::from_millis(16));
+        }
+    }
+
     // Set up a custom panic hook so we can log all panics to logfile
     // This is also only triggered once. Safe to call it multiple times.
     panic_hook::set_hook();
@@ -172,20 +184,10 @@ extern "system" fn DllMain(
     _lpv_reserved: *const c_void,
 ) -> BOOL {
     match fdw_reason {
-        DLL_PROCESS_ATTACH => 'attach: {
+        DLL_PROCESS_ATTACH => {
             // basic dll init code here
 
-            // If you're getting a hang on the game when you start it, it's because you compiled in debug mode,
-            // haven't attached a debugger, and this code here is still enabled!
-            //
-            // If you don't want to wait to ever attach a debugger, then comment or remove this line
-            if cfg!(debug_assertions) {
-                let is_debugger_present = || unsafe { IsDebuggerPresent().as_bool() };
-                while !is_debugger_present() {
-                    // 60hz polling
-                    thread::sleep(time::Duration::from_millis(16));
-                }
-            }
+            _ = MODULE.set(unsafe { ThreadedWrapper::new(module) });
 
             // Note about calling `DisableThreadLibraryCalls`. By default crt static is enabled (see .cargo/config.toml),
             // so you should not call this function unless you remove `-Ctarget-feature=+crt-static` from the file.
@@ -193,33 +195,28 @@ extern "system" fn DllMain(
             // > Consider calling DisableThreadLibraryCalls when receiving DLL_PROCESS_ATTACH, unless your DLL is
             // > linked with static C run-time library (CRT).
 
-            _ = MODULE.set(unsafe { ThreadedWrapper::new(module) });
+            // noop if yabg3nml is running, because it calls the Init fn directly instead of relying on DllMain.
+            // we will fallback to calling Init below in non-yabg3nml since we have no choice
+            if !is_yabg3nml() {
+                // > Call CreateThread. Creating a thread can work if you do not synchronize with
+                //   other threads, but it is risky.
 
-            // noop if it was called from yabg3nml
-            // because we prefer to call actual init functionality properly instead of in DllMain where there can be problems
-            // but we will fallback to calling Init below anyways since we have no choice
-            if is_yabg3nml() {
-                break 'attach;
+                // we do not use thread::spawn because we have no guarantee what will change in
+                // its implementation; calling this directly is safer
+                _ = unsafe {
+                    CreateThread(
+                        None,
+                        0,
+                        Some(extern_system(|_: *mut c_void| {
+                            Init();
+                            0
+                        })),
+                        None,
+                        THREAD_CREATE_RUN_IMMEDIATELY,
+                        None,
+                    )
+                };
             }
-
-            // > Call CreateThread. Creating a thread can work if you do not synchronize with
-            //   other threads, but it is risky.
-
-            // we do not use thread::spawn because we have no guarantee
-            // what will change in its implementation; calling this directly gives us more safety
-            _ = unsafe {
-                CreateThread(
-                    None,
-                    0,
-                    Some(extern_system(|_: *mut c_void| {
-                        Init();
-                        0
-                    })),
-                    None,
-                    THREAD_CREATE_RUN_IMMEDIATELY,
-                    None,
-                )
-            };
         }
 
         DLL_PROCESS_DETACH => {
