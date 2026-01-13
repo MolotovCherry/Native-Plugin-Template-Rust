@@ -84,7 +84,7 @@ fn entry(module: HINSTANCE) {
 /// template is already set up to run only Init in yabg3nml and fallback to running Init in `DllMain`
 /// for other ones.
 #[unsafe(no_mangle)]
-extern "C-unwind" fn Init() {
+extern "C" fn Init() {
     // Set up a custom panic hook so we can log all panics to logfile
     // This is also only triggered once. Safe to call it multiple times.
     panic_hook::set_hook();
@@ -166,7 +166,7 @@ extern "C-unwind" fn Init() {
 /// <https://learn.microsoft.com/en-us/windows/win32/dlls/dllmain?redirectedfrom=MSDN> (see warning section)
 /// <https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-best-practices>
 #[unsafe(no_mangle)]
-extern "system-unwind" fn DllMain(
+extern "system" fn DllMain(
     module: HINSTANCE,
     fdw_reason: u32,
     _lpv_reserved: *const c_void,
