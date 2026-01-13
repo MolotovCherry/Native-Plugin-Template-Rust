@@ -15,20 +15,17 @@ use eyre::{Context, ContextCompat, Error};
 // instead of a glob import
 use libmem::*;
 use log::{LevelFilter, error};
-use native_plugin_lib::declare_plugin;
+use native_plugin_lib::{declare_plugin, is_yabg3nml};
 use windows::{
     Win32::{
-        Foundation::{CloseHandle, HINSTANCE, TRUE},
+        Foundation::{HINSTANCE, TRUE},
         System::{
             Diagnostics::Debug::IsDebuggerPresent,
             SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH},
-            Threading::{
-                CreateThread, OpenEventW, SYNCHRONIZATION_SYNCHRONIZE,
-                THREAD_CREATE_RUN_IMMEDIATELY,
-            },
+            Threading::{CreateThread, THREAD_CREATE_RUN_IMMEDIATELY},
         },
     },
-    core::{BOOL, w},
+    core::BOOL,
 };
 
 use config::Config;
@@ -228,27 +225,4 @@ extern "system" fn DllMain(
     }
 
     TRUE
-}
-
-/// Detects if yabg3nml injected this dll.
-/// This is safe to use from `DllMain`
-fn is_yabg3nml() -> bool {
-    static CACHE: OnceLock<bool> = OnceLock::new();
-
-    *CACHE.get_or_init(|| {
-        match unsafe {
-            OpenEventW(
-                SYNCHRONIZATION_SYNCHRONIZE,
-                false,
-                w!(r"Global\yet-another-bg3-native-mod-loader"),
-            )
-        } {
-            Ok(h) => {
-                _ = unsafe { CloseHandle(h) };
-                true
-            }
-
-            Err(_) => false,
-        }
-    })
 }
